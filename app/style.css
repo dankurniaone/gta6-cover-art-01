@@ -2,7 +2,9 @@
    violet panels, teal reserved for the small line under the wordmark only.
    The preview is the dominant element; controls sit in a narrow rail on
    the left. The preview canvas sits on the same deep violet as the cover
-   field, so the grid reads as one poster even before it is exported. */
+   field, so the grid reads as one poster even before it is exported.
+   The cover's vignette panels are real photographs now, so the preview
+   carries a slightly deeper shadow to read as a printed poster. */
 
 @font-face {
   font-family: 'Anton';
@@ -188,7 +190,7 @@ button.primary:hover { filter: brightness(1.12); }
   border: 1px solid var(--border);
   border-radius: 4px;
   background: var(--field);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.55);
 }
 
 .preview-caption { margin: 12px 0 0; color: var(--text-dim); font-size: 14px; }

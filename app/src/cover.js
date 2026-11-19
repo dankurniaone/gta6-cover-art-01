@@ -10,7 +10,7 @@
 // strokes, no outer border). There is no caption strip below the grid:
 // GTA covers carry the title in the middle, so the user's caption
 // becomes a tagline under the wordmark inside the logo panel, and the
-// user's photo sits in a portrait panel among the illustrated vignettes
+// user's photo sits in a portrait panel among the photo vignettes
 // (see panels.js), graded warm so it reads as one picture with them.
 
 import { VIGNETTES } from './panels.js';
@@ -144,7 +144,7 @@ export function layoutPanels(state, width, height) {
 
 /** Draws one photo into a panel with cover/contain fit, zoom and pan,
  *  then grades it warm (a pink wash from the top, orange from the foot)
- *  so a daylight photo sits in the same light as the illustrated panels
+ *  so a daylight photo sits in the same light as the photo vignettes
  *  instead of reading as a pasted snapshot. */
 export function drawPhotoPanel(g, photo, rect, theme) {
   const { img } = photo;

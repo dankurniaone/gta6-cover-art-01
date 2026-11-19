@@ -6,6 +6,7 @@
 // among the illustrated vignettes.
 
 import { THEMES, LAYOUTS, EXPORT_SIZES, defaultState, renderCover, panelAt } from './cover.js';
+import { loadVignetteImages } from './panels.js';
 import { runShot } from './shots.js';
 
 const canvas = document.getElementById('cover');
@@ -202,12 +203,17 @@ captionInput.value = state.caption;
 subtitleInput.value = state.subtitle;
 
 const shot = new URLSearchParams(location.search).get('shot');
-if (shot) {
-  runShot(shot, new URLSearchParams(location.search), state, { loadImage, loadFile, redraw: repaint, setStatus: say });
-} else {
-  repaint();
-  say('Load a photo to start — or try a sample below.');
-}
+// Preload the vignette photos before the first paint, so the cover
+// never flashes the fallback gradient. A photo that fails to load just
+// falls back — the preload never rejects (see panels.js).
+loadVignetteImages(loadImage).then(() => {
+  if (shot) {
+    runShot(shot, new URLSearchParams(location.search), state, { loadImage, loadFile, redraw: repaint, setStatus: say });
+  } else {
+    repaint();
+    say('Load a photo to start — or try a sample below.');
+  }
+});
 
 // Sample photos, free to use (made with an image model for make.fun).
 document.querySelectorAll('[data-sample]').forEach((button) => {

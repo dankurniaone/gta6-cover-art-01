@@ -1,10 +1,12 @@
 // Vice City Cover Maker — the entry program for gta6-cover-art-01 (Node 22,
 // standard library only). The app is plain static files under app/:
-// index.html plus its ES modules, a bundled Anton font and two sample
-// photos, nothing fetched over the network. This program hands the entry
-// in: it copies app/ and screenshots/ from beside this file into the
-// output directory and writes /output/dossier.json with the vendored
-// make.fun library, so the judge can read the source and the screenshots.
+// index.html plus its ES modules, a bundled Anton font, two sample
+// photos, and eleven vignette photographs (real Pexels photos, free
+// licence — see the README for the photo IDs), nothing fetched over the
+// network. This program hands the entry in: it copies app/ and
+// screenshots/ from beside this file into the output directory and writes
+// /output/dossier.json with the vendored make.fun library, so the judge
+// can read the source and the screenshots.
 //
 // Local test run (outside the grader, MAKEFUN_OUTPUT_DIR stands in for
 // /output):

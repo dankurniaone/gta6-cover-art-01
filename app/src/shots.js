@@ -1,13 +1,19 @@
 // Fixed scenes for screenshots: ?shot=editor shows the app with a sample
 // photo loaded; ?shot=cover hides the controls and shows the cover alone
 // at the requested export size. window.__shotReady is set once the cover
-// has painted with its fonts, so a screenshot never catches a half-drawn
-// frame. Query params: photo, photo2, caption, subtitle, layout, theme,
-// size (e.g. 1920x1080), secondPanel, ox, oy.
+// has painted with its fonts and its vignette photos, so a screenshot
+// never catches a half-drawn frame. Query params: photo, photo2, caption,
+// subtitle, layout, theme, size (e.g. 1920x1080), secondPanel, ox, oy.
+
+import { loadVignetteImages } from './panels.js';
 
 export async function runShot(shot, query, state, helpers) {
   const { loadImage, redraw } = helpers;
   if (shot === 'cover') document.body.classList.add('shot-cover');
+  // Vignette photos first: the cover must paint with the real photos,
+  // not the fallback gradient, before __shotReady fires. The preload is
+  // shared with the editor boot, so this is a no-op if it already ran.
+  try { await loadVignetteImages(loadImage); } catch { /* fallback gradient */ }
   if (query.get('layout')) state.layout = query.get('layout');
   if (query.get('theme')) state.theme = query.get('theme');
   if (query.get('size')) state.size = query.get('size');
