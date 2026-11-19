@@ -18,7 +18,7 @@
 // /output):
 //   mkdir -p out && MAKEFUN_OUTPUT_DIR=out node main.ts
 
-import { cpSync, existsSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
+import { cpSync, existsSync, mkdirSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { buildDossier } from './vendor/makefun-app.ts';
@@ -28,8 +28,13 @@ const here = fileURLToPath(new URL('.', import.meta.url));
 const outDir = process.env.MAKEFUN_OUTPUT_DIR ?? '/output';
 
 // Wipe the output first so a stale file can never leak into the entry.
-rmSync(outDir, { recursive: true, force: true });
+// Clear only the contents, never the directory itself: in the grader
+// /output is a volume mount point, and removing a mount point fails
+// with EBUSY (force:true only ignores ENOENT).
 mkdirSync(outDir, { recursive: true });
+for (const entry of readdirSync(outDir)) {
+  rmSync(join(outDir, entry), { recursive: true, force: true });
+}
 
 // The app, then the screenshots beside it.
 cpSync(join(here, 'app'), join(outDir, 'app'), { recursive: true });
