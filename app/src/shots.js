@@ -3,7 +3,7 @@
 // at the requested export size. window.__shotReady is set once the cover
 // has painted with its fonts and its vignette photos, so a screenshot
 // never catches a half-drawn frame. Query params: photo, photo2, caption,
-// subtitle, layout, theme, size (e.g. 1920x1080), secondPanel, ox, oy.
+// layout, theme, size (e.g. 1920x1080), secondPanel, ox, oy.
 
 import { loadVignetteImages } from './panels.js';
 
@@ -18,12 +18,9 @@ export async function runShot(shot, query, state, helpers) {
   if (query.get('theme')) state.theme = query.get('theme');
   if (query.get('size')) state.size = query.get('size');
   if (query.get('caption') !== null) state.caption = query.get('caption');
-  if (query.get('subtitle') !== null) state.subtitle = query.get('subtitle');
   if (query.get('secondPanel')) state.secondPanel = query.get('secondPanel');
   const captionField = document.getElementById('caption');
-  const subtitleField = document.getElementById('subtitle');
   if (captionField) captionField.value = state.caption;
-  if (subtitleField) subtitleField.value = state.subtitle;
   const layoutField = document.getElementById('layout');
   const themeField = document.getElementById('theme');
   if (layoutField) layoutField.value = state.layout;

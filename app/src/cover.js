@@ -8,10 +8,14 @@
 // GTA V cover (nine panels, one hexagonal wordmark tile, every panel
 // pulled up to eight degrees off axis, gutters that are gaps, not
 // strokes, no outer border). There is no caption strip below the grid:
-// GTA covers carry the title in the middle, so the user's caption
-// becomes a tagline under the wordmark inside the logo panel, and the
-// user's photo sits in a portrait panel among the photo vignettes
-// (see panels.js), graded warm so it reads as one picture with them.
+// GTA covers carry the title in the middle, so the centre panel is the
+// wordmark alone — a big VI in the Vice City gradient (cobalt blue at
+// the top, through magenta, into burnt orange at the foot) with palm
+// silhouettes inside it, and "grand theft auto" stacked in white over
+// it, exactly as Rockstar draws it. No tagline sits under the logo; the
+// user's title names the exported PNG instead (see main.js). The user's
+// photo sits in a portrait panel among the photo vignettes (see
+// panels.js), graded warm so it reads as one picture with them.
 
 import { VIGNETTES } from './panels.js';
 
@@ -101,14 +105,13 @@ export const EXPORT_SIZES = [
 
 /** The editor state the renderer reads. `photo` / `photo2` are
  *  { img, zoom, ox, oy, fit } or null; ox/oy pan the photo in -1..1.
- *  `caption` is the tagline under the wordmark; `subtitle` is the small
- *  line above it. */
+ *  `caption` is the cover title: it names the exported PNG, it is
+ *  never drawn on the cover — the centre panel is the wordmark alone. */
 export function defaultState() {
   return {
     layout: 'hero',
     theme: 'sunset',
     caption: 'SUNSET HEIST',
-    subtitle: 'LEONIDA · VICE CITY',
     photo: null,
     photo2: null,
     secondPanel: 'boat',
@@ -208,77 +211,124 @@ export function drawEmptyPhotoPanel(g, rect, label) {
   g.fillText(label, rect.x + rect.w / 2, rect.y + rect.h / 2);
 }
 
-/** The centre wordmark, in the spirit of the official GTA VI logo: a big
- *  "VI" numeral in a pink-to-amber gradient with a dark outline, the
- *  words "grand theft auto" stacked in white Anton block capitals with a
- *  hard black outline over it, and the user's caption as a small
- *  letterspaced tagline underneath (with the subtitle above it, smaller
- *  still). Everything is fitted to the panel, so it works in a square
- *  centre tile and in a wide duo tile alike. */
-export function drawLogoPanel(g, state, rect, theme) {
+/** The centre wordmark, faithful to the official GTA VI logo (18 June
+ *  2026). The real mark is a huge white wordmark — "grand theft auto"
+ *  in three stacked lines of broad Pricedown capitals with a hard black
+ *  outline — superimposed over a big VI in the Vice City gradient
+ *  (cobalt blue at the top, through magenta and hot pink, into burnt
+ *  orange at the foot), the VI carrying a thin white inner border and
+ *  palm silhouettes in its upper corners. The wordmark dominates; the
+ *  VI is its backdrop, mostly covered by the words, its gradient
+ *  peeking out around the edges. There is no tagline under the logo.
+ *  Anton is a condensed stand-in for Pricedown, so both the VI and the
+ *  words are drawn horizontally stretched to the broad proportions of
+ *  the real mark. The whole logo is fitted to the panel, so it fills a
+ *  square centre tile and a wide duo tile alike. */
+export function drawLogoPanel(g, rect, theme) {
   const { x, y, w, h } = rect;
   const cx = x + w / 2;
+  const cy = y + h / 2;
   const family = '"Anton", "Arial Narrow", "Helvetica Neue", sans-serif';
   g.textAlign = 'center';
   g.textBaseline = 'middle';
   g.lineJoin = 'round';
-  // The VI: a pink-to-amber gradient, dark outline, kept clear of the
-  // wordmark below it so the two never collide.
-  let viSize = h * 0.42;
-  const grad = g.createLinearGradient(cx, y + h * 0.04, cx, y + h * 0.44);
-  grad.addColorStop(0, '#ff2e88');
-  grad.addColorStop(0.55, '#ff7a1a');
-  grad.addColorStop(1, '#ffd23e');
+
+  // The wordmark first, sized: it is the dominant element, so it sets
+  // the logo's scale. Anton's "grand" is 2.33 em wide; the 1.7 stretch
+  // brings it to Pricedown's breadth (the real "grand" is ~4.2 em wide
+  // for its height). The three lines fill most of the panel height.
+  const wordStretch = 1.7;
+  const wordSize = Math.min(h * 0.28, w * 0.193);
+  const lineH = wordSize * 0.92;
+  // The three lines, visually centred on the panel: "grand" carries a
+  // tall ascent and "auto" almost no descent, so the middle line sits
+  // a touch above centre to balance the block.
+  const firstY = cy - lineH + wordSize * 0.425;
+  const wordW = 2.33 * wordSize * wordStretch;
+
+  // The VI, a backdrop slightly larger than the wordmark: it fills the
+  // panel height and runs a little wider than the words, so its gradient
+  // frames the wordmark on every side.
+  const viH = h * 0.94;
+  const viW = wordW * 1.18;
+  const viSize = viH / 0.86;
+  const viStretch = viW / (0.70 * viSize);
+
+  // The VI, drawn in a horizontally stretched space so it reads as the
+  // real mark's broad numeral (a font's VI is far narrower than the
+  // drawn one). Double outline — thick dark, then a thinner white line
+  // inside it — then the Vice City gradient. The earlier version ran
+  // pink-to-amber and ended yellow; the real logo starts cobalt blue
+  // and ends burnt orange.
+  g.save();
+  g.translate(cx, cy);
+  g.scale(viStretch, 1);
   g.font = `${viSize}px ${family}`;
-  while (g.measureText('VI').width > w * 0.8 && viSize > 16) {
-    viSize -= 4;
-    g.font = `${viSize}px ${family}`;
-  }
-  g.lineWidth = Math.max(3, viSize * 0.08);
+  const grad = g.createLinearGradient(0, -viH / 2, 0, viH / 2);
+  grad.addColorStop(0, '#2b3fd4');
+  grad.addColorStop(0.38, '#c81d7a');
+  grad.addColorStop(0.62, '#ff2e88');
+  grad.addColorStop(1, '#ff7a1a');
+  g.lineWidth = Math.max(4, viSize * 0.06);
   g.strokeStyle = '#12081f';
-  g.strokeText('VI', cx, y + h * 0.26);
+  g.strokeText('VI', 0, 0);
+  g.lineWidth = Math.max(2, viSize * 0.028);
+  g.strokeStyle = '#ffffff';
+  g.strokeText('VI', 0, 0);
   g.fillStyle = grad;
-  g.fillText('VI', cx, y + h * 0.26);
-  // The wordmark, stacked, white with a hard black outline, fitted to
-  // the panel and sitting in the middle band, clear of the VI above and
-  // the taglines below.
+  g.fillText('VI', 0, 0);
+  g.restore();
+
+  // Palm silhouettes in the upper corners of the VI — the real logo's
+  // signature detail, dark against the blue-purple band above the
+  // wordmark. They sit inside the VI's bounds, so they never spill
+  // onto the violet field; a stray hair outside it would be dark on
+  // dark and invisible anyway.
+  const bandTop = cy - viH / 2;
+  const wordTop = firstY - wordSize * 0.86;
+  const bandH = Math.max(8, wordTop - bandTop);
+  g.save();
+  g.strokeStyle = 'rgba(26, 11, 46, 0.6)';
+  g.lineWidth = Math.max(2, viSize * 0.014);
+  g.lineCap = 'round';
+  const fan = (ox, oy, dir, len) => {
+    for (let i = 0; i <= 3; i++) {
+      const a = -Math.PI / 2 + dir * (0.25 + i * 0.28);
+      const ex = ox + Math.cos(a) * len;
+      const ey = oy + Math.sin(a) * len * 0.8;
+      const mx = ox + Math.cos(a) * len * 0.5;
+      const my = oy + Math.sin(a) * len * 0.5 - len * 0.15;
+      g.beginPath();
+      g.moveTo(ox, oy);
+      g.quadraticCurveTo(mx, my, ex, ey);
+      g.stroke();
+    }
+  };
+  const fanY = bandTop + bandH * 0.75;
+  fan(cx - viW * 0.30, fanY, -1, bandH * 1.1);
+  fan(cx + viW * 0.30, fanY, 1, bandH * 1.1);
+  g.restore();
+
+  // The wordmark, superimposed over the VI: three stacked lines, white
+  // with a hard black outline, drawn in the same stretched space as the
+  // VI so the letters read as broad Pricedown capitals, not condensed
+  // Anton. The words are the same visual weight as the VI — the earlier
+  // version shrank them into a separate band below it, which is what
+  // made the centre read as stacked fragments.
   const words = ['grand', 'theft', 'auto'];
-  let wordSize = Math.min(h * 0.115, w * 0.17);
+  g.save();
+  g.translate(cx, 0);
+  g.scale(wordStretch, 1);
   g.font = `${wordSize}px ${family}`;
-  const widest = Math.max(...words.map((word) => g.measureText(word).width));
-  if (widest > w * 0.74) {
-    wordSize *= (w * 0.74) / widest;
-    g.font = `${wordSize}px ${family}`;
-  }
-  const lineH = wordSize * 0.95;
-  const blockTop = y + h * 0.5;
-  g.lineWidth = Math.max(2, wordSize * 0.1);
+  g.lineWidth = Math.max(2, wordSize * 0.11);
   g.strokeStyle = '#12081f';
   words.forEach((word, i) => {
-    const ly = blockTop + i * lineH;
-    g.strokeText(word, cx, ly);
+    const ly = firstY + i * lineH;
+    g.strokeText(word, 0, ly);
     g.fillStyle = '#ffffff';
-    g.fillText(word, cx, ly);
+    g.fillText(word, 0, ly);
   });
-  // Tagline: the user's caption, letterspaced, in the theme accent;
-  // the subtitle sits above it, smaller and dimmer. Both live in the
-  // bottom band, below the wordmark, so nothing overlaps.
-  const caption = (state.caption || '').trim().toUpperCase();
-  const subtitle = (state.subtitle || '').trim().toUpperCase();
-  if (subtitle) {
-    const subSize = Math.max(10, h * 0.04);
-    g.font = `600 ${subSize}px system-ui, sans-serif`;
-    g.fillStyle = theme.accent2;
-    const spacedSub = subtitle.split('').join('  ');
-    g.fillText(spacedSub, cx, y + h * 0.87);
-  }
-  if (caption) {
-    const capSize = Math.max(11, h * 0.052);
-    g.font = `700 ${capSize}px system-ui, sans-serif`;
-    const spacedCap = caption.split('').join('  ');
-    g.fillStyle = '#ffffff';
-    g.fillText(spacedCap, cx, y + h * 0.94);
-  }
+  g.restore();
 }
 
 /** The Vice City grade: warm pink light from the top, orange from the
@@ -325,7 +375,7 @@ export function renderCover(canvas, state) {
     g.rect(panel.x, panel.y, panel.w, panel.h);
     g.clip();
     if (panel.id === 'logo') {
-      drawLogoPanel(g, state, panel, theme);
+      drawLogoPanel(g, panel, theme);
     } else if (panel.id === layout.hero) {
       if (state.photo && drawPhotoPanel(g, state.photo, panel, theme)) {
         // Photo drawn.

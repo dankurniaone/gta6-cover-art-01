@@ -13,8 +13,8 @@
 // Photo credits are in the README (Pexels photo IDs).
 
 /** The vignette ids the layouts use, and the photo file for each,
- *  relative to app/. `palms` is defined in the layouts but unused in
- *  any of them, so it has no photo and falls back to the gradient. */
+ *  relative to app/. Every id here has a photo; an id with no photo
+ *  falls back to the gradient. */
 export const VIGNETTE_PHOTOS = {
   heli: 'images/heli.jpg',
   skyline: 'images/skyline.jpg',
@@ -114,7 +114,9 @@ function makePainter(id) {
   };
 }
 
-/** The panel painters, keyed by the vignette id the layouts use. */
+/** The panel painters, keyed by the vignette id the layouts use. Only
+ *  ids with a photo are listed — an id with no photo would only ever
+ *  draw the fallback gradient, so it does not get a painter. */
 export const VIGNETTES = {
   heli: makePainter('heli'),
   duo: makePainter('duo'),
@@ -125,7 +127,6 @@ export const VIGNETTES = {
   supercar: makePainter('supercar'),
   gator: makePainter('gator'),
   bike: makePainter('bike'),
-  palms: makePainter('palms'),
   neon: makePainter('neon'),
   chase: makePainter('chase'),
 };

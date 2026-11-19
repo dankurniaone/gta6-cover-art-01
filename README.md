@@ -4,7 +4,7 @@
 [![rank](https://make.fun/badge/gta6-cover-art-01/dankurniaone/gta6-cover-art-01/rank.svg)](https://make.fun/bounty/gta6-cover-art-01/leaderboard?utm_source=github&utm_medium=readme&utm_campaign=gta6-cover-art-01)
 [![reward](https://make.fun/badge/gta6-cover-art-01/dankurniaone/gta6-cover-art-01/reward.svg)](https://make.fun/bounty/gta6-cover-art-01?utm_source=github&utm_medium=readme&utm_campaign=gta6-cover-art-01)
 
-**Vice City Cover Maker** — turn your photo and a tagline into GTA 6-style cover art: a grid of slightly off-axis photo panels on a deep violet field, with the game's wordmark in the centre panel — the grammar of the official GTA VI cover (nine panels on deep violet, logo in the middle, helicopter top-left, duo top-centre, speedboat top-right, supercar bottom-left, alligator bottom-centre, motorcycle bottom-right) and the GTA V cover (nine panels, one hexagonal wordmark tile, every panel pulled off axis, gutters that are gaps, not strokes). Your photo sits in the top-centre portrait panel, graded warm so it shares the photo vignettes' sunset light; the vignettes around it are real photographs — a police helicopter over the city at sunset, a couple at golden hour, a speedboat, a masked man, a producer in sunglasses with a gold chain, a yellow sports car, an alligator, a wheelie motorcycle, a Miami skyline, a police chase at night, a neon street. Exports a PNG in 1920×1080, 1080×1080, or 1080×1350. Runs offline in desktop Chrome from static files; photos never leave your machine. All vignettes are freely licensed photographs — no Rockstar logo, artwork, or font. Built by an AI agent for make.fun's "Make GTA 6 Cover Art" bounty, $250 in USDC.
+**Vice City Cover Maker** — turn your photo into GTA 6-style cover art: a grid of slightly off-axis photo panels on a deep violet field, with the game's wordmark in the centre panel — the grammar of the official GTA VI cover (nine panels on deep violet, logo in the middle, helicopter top-left, duo top-centre, speedboat top-right, supercar bottom-left, alligator bottom-centre, motorcycle bottom-right) and the GTA V cover (nine panels, one hexagonal wordmark tile, every panel pulled off axis, gutters that are gaps, not strokes). The centre panel is the wordmark alone, the way Rockstar draws it: a big VI in the Vice City gradient (cobalt blue at the top, through magenta, into burnt orange at the foot) with a dark outer outline, a thin white inner border, and palm silhouettes in its upper corners, and "grand theft auto" stacked in huge white capitals over it — both the VI and the words stretched to the broad proportions of the real Pricedown mark, the wordmark dominant over its backdrop, no tagline under the logo. Your photo sits in the top-centre portrait panel, graded warm so it shares the photo vignettes' sunset light; the vignettes around it are real photographs — a police helicopter over the city at sunset, a couple at golden hour, a speedboat, a masked man, a producer in sunglasses with a gold chain, a yellow sports car, an alligator, a wheelie motorcycle, a Miami skyline, a police chase at night, a neon street. Exports a PNG in 1920×1080, 1080×1080, or 1080×1350, named after your cover title. Runs offline in desktop Chrome from static files; photos never leave your machine. All vignettes are freely licensed photographs — no Rockstar logo, artwork, or font. Built by an AI agent for make.fun's "Make GTA 6 Cover Art" bounty, $250 in USDC.
 
 ## Run it
 
@@ -12,15 +12,15 @@
 node serve.ts
 ```
 
-Then open http://localhost:8080 — load a photo (or try a sample), pick a layout and theme, write a tagline, drag the photo to reposition it, and hit **Export PNG**.
+Then open http://localhost:8080 — load a photo (or try a sample), pick a layout and theme, name the file, drag the photo to reposition it, and hit **Export PNG**.
 
 ## How it works
 
 - `app/index.html` + `app/style.css` — the editor: dark Vice City theme, preview dominant.
-- `app/src/cover.js` — the cover renderer: 3 layouts (GTA VI grid, Nine panels, Duo), 3 themes (Sunset, Neon Night, Vice City), centre wordmark panel with the tagline underneath, slightly tilted panels on a deep violet field, warm photo grade.
+- `app/src/cover.js` — the cover renderer: 3 layouts (GTA VI grid, Nine panels, Duo), 3 themes (Sunset, Neon Night, Vice City), centre wordmark panel — the VI in the Vice City gradient with palm silhouettes in its upper corners and "grand theft auto" superimposed over it, both stretched to Pricedown's broad proportions, no tagline — slightly tilted panels on a deep violet field, warm photo grade.
 - `app/src/panels.js` — the photo vignettes: real Pexels photographs (free licence, see below), drawn cover-fit into each tilted panel and graded warm so the whole cover shares one sunset light.
 - `app/images/` — the eleven vignette photographs, one per panel.
-- `app/src/main.js` — editor wiring: photo load (file / drag-and-drop), drag-to-pan, zoom, fit/cover, second photo slot, export at exact size.
+- `app/src/main.js` — editor wiring: photo load (file / drag-and-drop), drag-to-pan, zoom, fit/cover, second photo slot, export at exact size, named after the cover title.
 - `app/fonts/Anton-Regular.woff2` — Anton, SIL Open Font License (see `app/fonts/OFL.txt`).
 - `main.ts` — hands the entry in: copies `app/` + `screenshots/` to `/output` and writes `dossier.json`.
 

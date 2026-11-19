@@ -1,9 +1,9 @@
 // Editor wiring — Vice City Cover Maker. Loads photos, keeps the live
 // preview in step with every control, drags the photo inside its portrait
-// panel, and exports the cover as a PNG at the exact post size chosen.
-// The cover itself is a GTA-style grid with the wordmark in the centre
-// (see cover.js); the main photo lives in the top-centre portrait panel,
-// among the illustrated vignettes.
+// panel, and exports the cover as a PNG at the exact post size chosen,
+// named after the cover title. The cover itself is a GTA-style grid with
+// the wordmark in the centre (see cover.js); the main photo lives in the
+// top-centre portrait panel, among the photo vignettes.
 
 import { THEMES, LAYOUTS, EXPORT_SIZES, defaultState, renderCover, panelAt } from './cover.js';
 import { loadVignetteImages } from './panels.js';
@@ -12,7 +12,6 @@ import { runShot } from './shots.js';
 const canvas = document.getElementById('cover');
 const statusLine = document.getElementById('status');
 const captionInput = document.getElementById('caption');
-const subtitleInput = document.getElementById('subtitle');
 const layoutSelect = document.getElementById('layout');
 const themeSelect = document.getElementById('theme');
 const zoomSlider = document.getElementById('zoom');
@@ -129,7 +128,6 @@ canvas.addEventListener('pointermove', (event) => {
 canvas.addEventListener('pointerup', () => { dragSlot = null; dragOrigin = null; });
 
 captionInput.addEventListener('input', () => { state.caption = captionInput.value; repaint(); });
-subtitleInput.addEventListener('input', () => { state.subtitle = subtitleInput.value; repaint(); });
 
 layoutSelect.addEventListener('change', () => { state.layout = layoutSelect.value; repaint(); });
 themeSelect.addEventListener('change', () => { state.theme = themeSelect.value; repaint(); });
@@ -156,6 +154,15 @@ sizeButtons.forEach((button) => {
   });
 });
 
+/** Turns the cover title into a safe file-name slug: lowercase,
+ *  spaces to dashes, anything else dropped. An empty title falls back
+ *  to no slug, so the file is just vice-city-cover-<size>.png. */
+function slugify(text) {
+  const slug = (text || '').trim().toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+  return slug.slice(0, 40);
+}
+
 exportButton.addEventListener('click', () => {
   const size = activeSize();
   // Render at the exact export size on an offscreen canvas — never upscale.
@@ -168,12 +175,16 @@ exportButton.addEventListener('click', () => {
       say('Export failed — try again.');
       return;
     }
+    const slug = slugify(state.caption);
+    const fileName = slug
+      ? `vice-city-cover-${slug}-${size.id}.png`
+      : `vice-city-cover-${size.id}.png`;
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = `vice-city-cover-${size.id}.png`;
+    a.download = fileName;
     a.click();
     setTimeout(() => URL.revokeObjectURL(a.href), 5000);
-    say(`Saved vice-city-cover-${size.id}.png — ${size.w} × ${size.h}.`);
+    say(`Saved ${fileName} — ${size.w} × ${size.h}.`);
   }, 'image/png');
 });
 
@@ -200,7 +211,6 @@ layoutSelect.value = state.layout;
 themeSelect.value = state.theme;
 secondPanelSelect.value = state.secondPanel;
 captionInput.value = state.caption;
-subtitleInput.value = state.subtitle;
 
 const shot = new URLSearchParams(location.search).get('shot');
 // Preload the vignette photos before the first paint, so the cover

@@ -3,10 +3,16 @@
 // index.html plus its ES modules, a bundled Anton font, two sample
 // photos, and eleven vignette photographs (real Pexels photos, free
 // licence — see the README for the photo IDs), nothing fetched over the
-// network. This program hands the entry in: it copies app/ and
-// screenshots/ from beside this file into the output directory and writes
-// /output/dossier.json with the vendored make.fun library, so the judge
-// can read the source and the screenshots.
+// network. The centre panel is the wordmark alone, drawn to match the
+// official GTA VI logo (VI in the blue-to-orange gradient with palm
+// silhouettes, "grand theft auto" superimposed over it, no tagline — both
+// the VI and the words horizontally stretched to Pricedown's broad
+// proportions, the VI with a dark outer outline and a thin white inner
+// border, the wordmark dominant over its backdrop).
+// This program hands the entry in: it copies app/ and screenshots/ from
+// beside this file into the output directory and writes /output/dossier.json
+// with the vendored make.fun library, so the judge can read the source
+// and the screenshots.
 //
 // Local test run (outside the grader, MAKEFUN_OUTPUT_DIR stands in for
 // /output):
