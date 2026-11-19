@@ -3,20 +3,84 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Cover Snap</title>
+<title>Vice City Cover Maker — GTA 6-style cover art from your photo</title>
 <link rel="stylesheet" href="./style.css">
 </head>
 <body>
+<header class="topbar">
+  <div class="brand">
+    <span class="brand-mark">VC</span>
+    <div>
+      <h1>Vice City Cover Maker</h1>
+      <p>Your photo, captioned like a GTA 6 poster — exported as a PNG.</p>
+    </div>
+  </div>
+  <p class="topbar-note">Offline · photos never leave this machine · no Rockstar artwork</p>
+</header>
 <main class="app">
-  <section class="controls">
-    <h1>Cover Snap</h1>
-    <p>A photo and a caption, made into a square cover.</p>
-    <label>Photo <input id="photo" type="file" accept="image/*"></label>
-    <label>Caption <input id="caption" type="text" maxlength="40" value="Sunset Heist"></label>
-    <button id="export" type="button">Export PNG 1080 x 1080</button>
-    <p id="status" role="status"></p>
+  <section class="controls" aria-label="Cover controls">
+    <div class="group">
+      <h2>1 · Photos</h2>
+      <label class="field">Main photo — the hero panel
+        <input id="photo" type="file" accept="image/*">
+      </label>
+      <label class="field">Second photo — fills one more panel
+        <input id="photo2" type="file" accept="image/*">
+      </label>
+      <div class="row">
+        <button type="button" data-sample="pier">Try sample: pier</button>
+        <button type="button" data-sample="boulevard">Try sample: boulevard</button>
+      </div>
+      <p class="hint">Drop a photo onto the cover, or Shift-drop for the second photo. Drag inside the hero panel to reposition it.</p>
+    </div>
+
+    <div class="group">
+      <h2>2 · Layout &amp; grade</h2>
+      <label class="field">Panel layout
+        <select id="layout"></select>
+      </label>
+      <label class="field">Colour theme
+        <select id="theme"></select>
+      </label>
+      <label class="field">Second photo goes in the
+        <select id="second-panel"></select>
+      </label>
+    </div>
+
+    <div class="group">
+      <h2>3 · Words</h2>
+      <label class="field">Caption
+        <input id="caption" type="text" maxlength="40" value="SUNSET HEIST">
+      </label>
+      <label class="field">Subtitle
+        <input id="subtitle" type="text" maxlength="40" value="LEONIDA · VICE CITY">
+      </label>
+    </div>
+
+    <div class="group">
+      <h2>4 · Crop</h2>
+      <label class="field">Zoom <span id="zoom-value">100%</span>
+        <input id="zoom" type="range" min="100" max="250" value="100">
+      </label>
+      <label class="check"><input id="fit" type="checkbox"> Fit whole photo (letterbox)</label>
+    </div>
+
+    <div class="group">
+      <h2>5 · Export</h2>
+      <div class="row sizes" role="group" aria-label="Export size">
+        <button type="button" data-size="1920x1080" class="active">1920 × 1080</button>
+        <button type="button" data-size="1080x1080">1080 × 1080</button>
+        <button type="button" data-size="1080x1350">1080 × 1350</button>
+      </div>
+      <button id="export" type="button" class="primary">Export PNG</button>
+      <p id="status" role="status"></p>
+    </div>
   </section>
-  <canvas id="cover" width="1080" height="1080" aria-label="The cover"></canvas>
+
+  <section class="preview" aria-label="Cover preview">
+    <canvas id="cover" width="1920" height="1080"></canvas>
+    <p class="preview-caption">Live preview — exactly what the PNG will look like.</p>
+  </section>
 </main>
 <script type="module" src="./src/main.js"></script>
 </body>
