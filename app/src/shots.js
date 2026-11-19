@@ -3,7 +3,7 @@
 // at the requested export size. window.__shotReady is set once the cover
 // has painted with its fonts, so a screenshot never catches a half-drawn
 // frame. Query params: photo, photo2, caption, subtitle, layout, theme,
-// size (e.g. 1920x1080).
+// size (e.g. 1920x1080), secondPanel, ox, oy.
 
 export async function runShot(shot, query, state, helpers) {
   const { loadImage, redraw } = helpers;
@@ -14,14 +14,14 @@ export async function runShot(shot, query, state, helpers) {
   if (query.get('caption') !== null) state.caption = query.get('caption');
   if (query.get('subtitle') !== null) state.subtitle = query.get('subtitle');
   if (query.get('secondPanel')) state.secondPanel = query.get('secondPanel');
-  const captionInput = document.getElementById('caption');
-  const subtitleInput = document.getElementById('subtitle');
-  if (captionInput) captionInput.value = state.caption;
-  if (subtitleInput) subtitleInput.value = state.subtitle;
-  const layoutSelect = document.getElementById('layout');
-  const themeSelect = document.getElementById('theme');
-  if (layoutSelect) layoutSelect.value = state.layout;
-  if (themeSelect) themeSelect.value = state.theme;
+  const captionField = document.getElementById('caption');
+  const subtitleField = document.getElementById('subtitle');
+  if (captionField) captionField.value = state.caption;
+  if (subtitleField) subtitleField.value = state.subtitle;
+  const layoutField = document.getElementById('layout');
+  const themeField = document.getElementById('theme');
+  if (layoutField) layoutField.value = state.layout;
+  if (themeField) themeField.value = state.theme;
 
   const photoName = query.get('photo') ?? 'pier';
   const panY = Number(query.get('oy') ?? 0) || 0;
@@ -36,7 +36,9 @@ export async function runShot(shot, query, state, helpers) {
   if (photo2Name) {
     try {
       const img2 = await loadImage(`samples/${photo2Name}.jpg`);
-      state.photo2 = { img: img2, zoom: 1, ox: 0, oy: 0, fit: 'cover' };
+      const panX2 = Number(query.get('ox2') ?? 0) || 0;
+      const panY2 = Number(query.get('oy2') ?? 0) || 0;
+      state.photo2 = { img: img2, zoom: 1, ox: panX2, oy: panY2, fit: 'cover' };
     } catch {
       // Second photo is optional.
     }

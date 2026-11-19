@@ -1,6 +1,8 @@
 /* Vice City Cover Maker — dark editor theme. One accent (hot pink), deep
-   purple panels, teal reserved for the subtitle line only. The preview is
-   the dominant element; controls sit in a narrow rail on the left. */
+   violet panels, teal reserved for the small line under the wordmark only.
+   The preview is the dominant element; controls sit in a narrow rail on
+   the left. The preview canvas sits on the same deep violet as the cover
+   field, so the grid reads as one poster even before it is exported. */
 
 @font-face {
   font-family: 'Anton';
@@ -20,6 +22,7 @@
   --accent: #ff2e88;
   --accent-ink: #ffffff;
   --teal: #19e3d6;
+  --field: #2b0a4d;
   --radius: 8px;
 }
 
@@ -184,7 +187,7 @@ button.primary:hover { filter: brightness(1.12); }
   height: auto;
   border: 1px solid var(--border);
   border-radius: 4px;
-  background: #000;
+  background: var(--field);
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
 }
 

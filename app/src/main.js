@@ -1,6 +1,9 @@
 // Editor wiring — Vice City Cover Maker. Loads photos, keeps the live
-// preview in step with every control, drags the photo inside its panel,
-// and exports the cover as a PNG at the exact post size chosen.
+// preview in step with every control, drags the photo inside its portrait
+// panel, and exports the cover as a PNG at the exact post size chosen.
+// The cover itself is a GTA-style grid with the wordmark in the centre
+// (see cover.js); the main photo lives in the top-centre portrait panel,
+// among the illustrated vignettes.
 
 import { THEMES, LAYOUTS, EXPORT_SIZES, defaultState, renderCover, panelAt } from './cover.js';
 import { runShot } from './shots.js';
@@ -20,7 +23,7 @@ const exportButton = document.getElementById('export');
 const state = defaultState();
 let fontsReady = false;
 
-document.fonts?.ready.then(() => { fontsReady = true; redraw(); });
+document.fonts?.ready.then(() => { fontsReady = true; repaint(); });
 
 /** Loads an image from a URL, resolving once it can be drawn. */
 export function loadImage(url) {
@@ -37,16 +40,16 @@ export function loadFile(file) {
   return loadImage(URL.createObjectURL(file));
 }
 
-function setStatus(text) {
+function say(text) {
   statusLine.textContent = text;
 }
 
-function currentSize() {
+function activeSize() {
   return EXPORT_SIZES.find((s) => s.id === state.size) ?? EXPORT_SIZES[0];
 }
 
-function redraw() {
-  const size = currentSize();
+function repaint() {
+  const size = activeSize();
   if (canvas.width !== size.w || canvas.height !== size.h) {
     canvas.width = size.w;
     canvas.height = size.h;
@@ -55,25 +58,25 @@ function redraw() {
   canvas.setAttribute('aria-label', `Cover preview: ${state.caption || 'untitled'}`);
 }
 
-function bindPhotoInput(inputId, slot) {
+function wirePhotoInput(inputId, slot) {
   document.getElementById(inputId).addEventListener('change', async (event) => {
     const file = event.target.files[0];
     if (!file) return;
     try {
       const img = await loadFile(file);
       state[slot] = { img, zoom: 1, ox: 0, oy: 0, fit: 'cover' };
-      redraw();
-      setStatus(slot === 'photo'
-        ? `Main photo loaded — drag it in the hero panel to reposition.`
+      repaint();
+      say(slot === 'photo'
+        ? `Main photo loaded — drag it in the portrait panel to reposition.`
         : `Second photo loaded — it fills the ${state.secondPanel} panel.`);
     } catch {
-      setStatus('That file could not be read as a photo. Try a JPG or PNG.');
+      say('That file could not be read as a photo. Try a JPG or PNG.');
     }
   });
 }
 
-bindPhotoInput('photo', 'photo');
-bindPhotoInput('photo2', 'photo2');
+wirePhotoInput('photo', 'photo');
+wirePhotoInput('photo2', 'photo2');
 
 // Drag-and-drop anywhere on the preview: dropping a file loads it as the
 // main photo; dropping while holding Shift loads it as the second photo.
@@ -86,16 +89,16 @@ canvas.addEventListener('drop', async (event) => {
     const img = await loadFile(file);
     const slot = event.shiftKey ? 'photo2' : 'photo';
     state[slot] = { img, zoom: 1, ox: 0, oy: 0, fit: 'cover' };
-    redraw();
-    setStatus(slot === 'photo' ? 'Main photo loaded.' : 'Second photo loaded.');
+    repaint();
+    say(slot === 'photo' ? 'Main photo loaded.' : 'Second photo loaded.');
   } catch {
-    setStatus('That file could not be read as a photo.');
+    say('That file could not be read as a photo.');
   }
 });
 
-// Drag inside the hero panel (or the second-photo panel) to reposition it.
-let dragTarget = null;
-let dragStart = null;
+// Drag inside the portrait panel (or the second-photo panel) to move it.
+let dragSlot = null;
+let dragOrigin = null;
 canvas.addEventListener('pointerdown', (event) => {
   const rect = canvas.getBoundingClientRect();
   const px = (event.clientX - rect.left) * (canvas.width / rect.width);
@@ -103,57 +106,57 @@ canvas.addEventListener('pointerdown', (event) => {
   const panel = panelAt(state, canvas.width, canvas.height, px, py);
   const layout = LAYOUTS[state.layout];
   if (panel && panel.id === layout.hero && state.photo) {
-    dragTarget = 'photo';
+    dragSlot = 'photo';
   } else if (panel && panel.id === state.secondPanel && state.photo2) {
-    dragTarget = 'photo2';
+    dragSlot = 'photo2';
   } else {
     return;
   }
-  dragStart = { x: event.clientX, y: event.clientY, ox: state[dragTarget].ox, oy: state[dragTarget].oy };
+  dragOrigin = { x: event.clientX, y: event.clientY, ox: state[dragSlot].ox, oy: state[dragSlot].oy };
   canvas.setPointerCapture(event.pointerId);
 });
 canvas.addEventListener('pointermove', (event) => {
-  if (!dragTarget || !dragStart) return;
+  if (!dragSlot || !dragOrigin) return;
   const rect = canvas.getBoundingClientRect();
-  const photo = state[dragTarget];
-  photo.ox = dragStart.ox + ((event.clientX - dragStart.x) / rect.width) * 4;
-  photo.oy = dragStart.oy + ((event.clientY - dragStart.y) / rect.height) * 4;
-  photo.ox = Math.max(-1, Math.min(1, photo.ox));
-  photo.oy = Math.max(-1, Math.min(1, photo.oy));
-  redraw();
+  const photo = state[dragSlot];
+  photo.ox = dragOrigin.ox + ((event.clientX - dragOrigin.x) / rect.width) * 4;
+  photo.oy = dragOrigin.oy + ((event.clientY - dragOrigin.y) / rect.height) * 4;
+  photo.ox = Math.max(-2, Math.min(2, photo.ox));
+  photo.oy = Math.max(-2, Math.min(2, photo.oy));
+  repaint();
 });
-canvas.addEventListener('pointerup', () => { dragTarget = null; dragStart = null; });
+canvas.addEventListener('pointerup', () => { dragSlot = null; dragOrigin = null; });
 
-captionInput.addEventListener('input', () => { state.caption = captionInput.value; redraw(); });
-subtitleInput.addEventListener('input', () => { state.subtitle = subtitleInput.value; redraw(); });
+captionInput.addEventListener('input', () => { state.caption = captionInput.value; repaint(); });
+subtitleInput.addEventListener('input', () => { state.subtitle = subtitleInput.value; repaint(); });
 
-layoutSelect.addEventListener('change', () => { state.layout = layoutSelect.value; redraw(); });
-themeSelect.addEventListener('change', () => { state.theme = themeSelect.value; redraw(); });
-secondPanelSelect.addEventListener('change', () => { state.secondPanel = secondPanelSelect.value; redraw(); });
+layoutSelect.addEventListener('change', () => { state.layout = layoutSelect.value; repaint(); });
+themeSelect.addEventListener('change', () => { state.theme = themeSelect.value; repaint(); });
+secondPanelSelect.addEventListener('change', () => { state.secondPanel = secondPanelSelect.value; repaint(); });
 
 zoomSlider.addEventListener('input', () => {
   document.getElementById('zoom-value').textContent = `${zoomSlider.value}%`;
   if (!state.photo) return;
   state.photo.zoom = Number(zoomSlider.value) / 100;
-  redraw();
+  repaint();
 });
 fitToggle.addEventListener('change', () => {
   if (!state.photo) return;
   state.photo.fit = fitToggle.checked ? 'fit' : 'cover';
-  redraw();
+  repaint();
 });
 
 sizeButtons.forEach((button) => {
   button.addEventListener('click', () => {
     state.size = button.dataset.size;
     sizeButtons.forEach((b) => b.classList.toggle('active', b === button));
-    redraw();
-    setStatus(`Preview size: ${currentSize().label}.`);
+    repaint();
+    say(`Preview size: ${activeSize().label}.`);
   });
 });
 
 exportButton.addEventListener('click', () => {
-  const size = currentSize();
+  const size = activeSize();
   // Render at the exact export size on an offscreen canvas — never upscale.
   const out = document.createElement('canvas');
   out.width = size.w;
@@ -161,7 +164,7 @@ exportButton.addEventListener('click', () => {
   renderCover(out, state);
   out.toBlob((blob) => {
     if (!blob) {
-      setStatus('Export failed — try again.');
+      say('Export failed — try again.');
       return;
     }
     const a = document.createElement('a');
@@ -169,7 +172,7 @@ exportButton.addEventListener('click', () => {
     a.download = `vice-city-cover-${size.id}.png`;
     a.click();
     setTimeout(() => URL.revokeObjectURL(a.href), 5000);
-    setStatus(`Saved vice-city-cover-${size.id}.png — ${size.w} × ${size.h}.`);
+    say(`Saved vice-city-cover-${size.id}.png — ${size.w} × ${size.h}.`);
   }, 'image/png');
 });
 
@@ -200,10 +203,10 @@ subtitleInput.value = state.subtitle;
 
 const shot = new URLSearchParams(location.search).get('shot');
 if (shot) {
-  runShot(shot, new URLSearchParams(location.search), state, { loadImage, loadFile, redraw, setStatus });
+  runShot(shot, new URLSearchParams(location.search), state, { loadImage, loadFile, redraw: repaint, setStatus: say });
 } else {
-  redraw();
-  setStatus('Load a photo to start — or try a sample below.');
+  repaint();
+  say('Load a photo to start — or try a sample below.');
 }
 
 // Sample photos, free to use (made with an image model for make.fun).
@@ -212,10 +215,10 @@ document.querySelectorAll('[data-sample]').forEach((button) => {
     try {
       const img = await loadImage(`samples/${button.dataset.sample}.jpg`);
       state.photo = { img, zoom: 1, ox: 0, oy: 0, fit: 'cover' };
-      redraw();
-      setStatus(`Sample photo ${button.dataset.sample} loaded.`);
+      repaint();
+      say(`Sample photo ${button.dataset.sample} loaded.`);
     } catch {
-      setStatus('The sample photo could not be loaded.');
+      say('The sample photo could not be loaded.');
     }
   });
 });
